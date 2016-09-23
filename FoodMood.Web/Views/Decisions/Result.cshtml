@@ -1,0 +1,114 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutRise.cshtml";
+}
+<section id="welcome">
+    <div class="container" id="chosenGenre">
+        <h2>You're in the mood for...</h2>
+        <hr class="sep">
+
+        <div ng-controller="myApp">
+            <div ng-controller="genresController as genreVm">
+                <a ng-click="genreVm.onClick()"> {{genreVm.pageTitle}}</a>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+@section Scripts{
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js">
+
+    </script>
+    @*<script type="text/javascript">
+
+        var genres = { services: { genreService: {} } };
+
+        genres.services.genreService.getAll = function(onSuccess, onError) {
+            var url = "/api/genres";
+            var settings = {
+                cache: false
+                , dataType: "json"
+                , success: onSuccess
+                , error: onError
+                , type: "GET"
+            };
+            $.ajax(url, settings);
+        }
+
+
+        (function () {
+            angular.module("myApp", []);
+        })();
+
+        (function () {
+            angular.module("myApp").controller("genresController", GenresController);
+
+            GenresController.$inject = ["scope"];
+
+            function GenresController($scope) {
+                vm = this;
+                vm.$scope = $scope;
+                vm.onClick = _onClick;
+
+                vm.pageTitle = "heehee";
+                vm.item = null;
+
+                _render();
+
+                function _render() {
+                    genres.services.genreService.getAll(_onGetAllSuccess)
+                }
+
+
+                function _onClick()
+                {
+                    vm.pageTitle = "Different Title";
+                    _onGetAllSuccess();
+                }
+                function _onGetAllSuccess(data, status, jqXHR) {
+                    $scope.$apply(function () {
+                        var genres = data.Items;
+                        vm.item = genres[Math.floor(Math.random() * genres.length)];
+                    })
+                }
+                function _onGetAllError(data, status, jqXHR) {
+                    console.log(jqXHR.responsetext)
+                }
+            }
+        })();
+    </script>*@
+
+
+    @*<script type="text/javascript">
+        $(document).ready(function () {
+            console.log("jquery ready");
+            randomGenre(getGenreSuccess, getGenreError);
+        });
+        function randomGenre(onSuccess, onError) {
+            var url = "/api/genres";
+            var settings = {
+                cache: false
+                , dataType: "json"
+                , success: onSuccess
+                , error: onError
+                , type: "GET"
+            };
+            $.ajax(url, settings);
+        }
+        function getGenreSuccess(data) {
+            var genres = data.Items;
+            var item = genres[Math.floor(Math.random() * genres.length)];
+            $("#chosenGenre").append("<h2>" + item.Name + "</h2>");
+
+        }
+
+        function getGenreError() {
+            console.log("get genre error");
+        }
+
+    </script>*@
+}
+
+
