@@ -2,52 +2,59 @@
 @{
     Layout = "~/Views/Shared/_LayoutRise.cshtml";
 }
-<section id="welcome">
-    <div class="container" id="chosenGenre">
-        <h2>You're in the mood for...</h2>
-        <hr class="sep">
 
-        <div ng-controller="myApp">
-            <div ng-controller="genresController as genreVm">
-                <a ng-click="genreVm.onClick()"> {{genreVm.pageTitle}}</a>
-            </div>
-
-        </div>
-
-    </div>
-</section>
-@section Scripts{
-
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js">
-
-    </script>
-    @*<script type="text/javascript">
-
-        var genres = { services: { genreService: {} } };
-
-        genres.services.genreService.getAll = function(onSuccess, onError) {
-            var url = "/api/genres";
-            var settings = {
-                cache: false
-                , dataType: "json"
-                , success: onSuccess
-                , error: onError
-                , type: "GET"
-            };
-            $.ajax(url, settings);
+@section Styles{
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
 
+        #map {
+            height: 100%;
+        }
+    </style>
+}
 
+
+<section id="welcome">
+    <div class="container" id="chosenGenre" ng-controller="genresController as genreVm">
+        <br />
+        <br />
+        <h2 ng-click="genreVm.onClick()">You're in the mood for...</h2>
+        <hr class="sep">
+
+
+        <div class="animated tada">
+            <h2>{{genreVm.item.Name || ""}}</h2>
+        </div>
+
+
+        <div>
+            <button class="btn btn-transparent" href="#">Learn More</button>
+        </div>
+    </div>
+</section>
+
+<div id="map"></div>
+<!-- Replace the value of the key parameter with your own API key. -->
+
+@section Scripts{
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBg2kW4qP-ZPMmjImaE6EBgPJtDAgQ0BsE&libraries=places&callback=initMap" async defer></script>
+
+    <script type="text/javascript">
         (function () {
             angular.module("myApp", []);
         })();
-
         (function () {
             angular.module("myApp").controller("genresController", GenresController);
 
-            GenresController.$inject = ["scope"];
+            GenresController.$inject = ["$scope", "$http"];
 
-            function GenresController($scope) {
+            function GenresController($scope, $http) {
                 vm = this;
                 vm.$scope = $scope;
                 vm.onClick = _onClick;
@@ -58,57 +65,104 @@
                 _render();
 
                 function _render() {
-                    genres.services.genreService.getAll(_onGetAllSuccess)
+                    getAll();
+                }
+
+                function getAll() {
+                    var settings = {
+                        method: 'GET',
+                        url: '/api/genres',
+                        responseType: 'json',
+                    }
+                    $http(settings).then(_onGetAllSuccess, _onGetAllError);
                 }
 
 
-                function _onClick()
-                {
-                    vm.pageTitle = "Different Title";
-                    _onGetAllSuccess();
+
+
+                function _onClick() {
+                    vm.item = vm.genres[Math.floor(Math.random() * vm.genres.length)];
                 }
                 function _onGetAllSuccess(data, status, jqXHR) {
-                    $scope.$apply(function () {
-                        var genres = data.Items;
-                        vm.item = genres[Math.floor(Math.random() * genres.length)];
-                    })
+                    vm.genres = data.data.Items;
                 }
                 function _onGetAllError(data, status, jqXHR) {
                     console.log(jqXHR.responsetext)
                 }
+
+                //function randomByLocation() {
+
+
+                //}
+
             }
+
         })();
-    </script>*@
+
+        var map;
+        var infowindow;
+
+        function initMap() {
+            var pyrmont = { lat: -33.867, lng: 151.195 };
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: pyrmont,
+                zoom: 15
+            });
+
+            infowindow = new google.maps.InfoWindow();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    infowindow.setPosition(pos);
+                    infowindow.setContent('Location found.');
+                    map.setCenter(pos);
+
+                    var service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch({
+                        location: pos,
+                        radius: 8047,
+                        type: ['restaurant']
+                    }, callback);
+
+                }, function () {
+                    handleLocationError(true, infowindow, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infowindow, map.getCenter());
+            }
 
 
-    @*<script type="text/javascript">
-        $(document).ready(function () {
-            console.log("jquery ready");
-            randomGenre(getGenreSuccess, getGenreError);
-        });
-        function randomGenre(onSuccess, onError) {
-            var url = "/api/genres";
-            var settings = {
-                cache: false
-                , dataType: "json"
-                , success: onSuccess
-                , error: onError
-                , type: "GET"
-            };
-            $.ajax(url, settings);
         }
-        function getGenreSuccess(data) {
-            var genres = data.Items;
-            var item = genres[Math.floor(Math.random() * genres.length)];
-            $("#chosenGenre").append("<h2>" + item.Name + "</h2>");
 
+        function callback(results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+
+                var randomLocation = results[Math.floor(Math.random() * vm.genres.length)];
+                createMarker(randomLocation);
+
+            }
         }
 
-        function getGenreError() {
-            console.log("get genre error");
-        }
+        function createMarker(place) {
+            var placeLoc = place.geometry.location;
+            var marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location
+            });
 
-    </script>*@
+            google.maps.event.addListener(marker, 'click', function () {
+                infowindow.setContent(place.name);
+                infowindow.open(map, this);
+            });
+        }
+    </script>
 }
 
 
