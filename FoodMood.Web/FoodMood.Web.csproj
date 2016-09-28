@@ -1130,7 +1130,6 @@
     <Content Include="Views\Home\Demo.cshtml" />
     <Content Include="Views\Decisions\Result.cshtml" />
     <Content Include="Scripts\version.json" />
-    <None Include="Web.Secrets.Config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
