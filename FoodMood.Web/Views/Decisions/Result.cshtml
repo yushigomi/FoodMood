@@ -25,16 +25,13 @@
         <br />
         <br />
         <h2 ng-click="genreVm.onClick()">You're in the mood for...</h2>
-        <hr class="sep">
-
-
-        <div class="animated tada">
+        <div>
             <h2>{{genreVm.item.Name || ""}}</h2>
         </div>
-
-
+        <hr class="sep">
+        <h2>Choose Restaurant Around Me</h2>
         <div>
-            <button class="btn btn-transparent" href="#">Learn More</button>
+            <button class="btn btn-block" onclick="randomByLocation()">Choose</button>
         </div>
     </div>
 </section>
@@ -90,14 +87,13 @@
                     console.log(jqXHR.responsetext)
                 }
 
-                //function randomByLocation() {
-
-
-                //}
-
             }
 
         })();
+
+
+
+
 
         var map;
         var infowindow;
@@ -112,6 +108,12 @@
 
             infowindow = new google.maps.InfoWindow();
 
+           
+
+
+        }
+
+        function randomByLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
                     var pos = {
@@ -126,7 +128,7 @@
                     var service = new google.maps.places.PlacesService(map);
                     service.nearbySearch({
                         location: pos,
-                        radius: 8047,
+                        radius: 2000,
                         type: ['restaurant']
                     }, callback);
 
@@ -137,8 +139,6 @@
                 // Browser doesn't support Geolocation
                 handleLocationError(false, infowindow, map.getCenter());
             }
-
-
         }
 
         function callback(results, status) {
