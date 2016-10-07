@@ -180,8 +180,13 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\ApiControllers\BaseApiController.cs" />
     <Compile Include="Controllers\ApiControllers\GenresApiController.cs" />
+    <Compile Include="Controllers\ApiControllers\OptionsApiController.cs" />
     <Compile Include="Controllers\DecisionsController.cs" />
+    <Compile Include="Models\Domains\Option.cs" />
     <Compile Include="Models\Requests\GenreAddRequest.cs" />
+    <Compile Include="Models\Requests\GenreUpdateRequest.cs" />
+    <Compile Include="Models\Requests\OptionAddRequest.cs" />
+    <Compile Include="Models\Requests\OptionUpdateRequest.cs" />
     <Compile Include="Services\GenresService.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -204,6 +209,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Services\BaseService.cs" />
+    <Compile Include="Services\OptionsService.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>

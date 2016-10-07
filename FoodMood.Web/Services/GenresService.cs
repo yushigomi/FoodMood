@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FoodMood.Web.Models.Domains;
 using System.Data.SqlClient;
 using System.Data;
+using FoodMood.Web.Models.Requests;
 
 namespace FoodMood.Web.Services
 {
@@ -78,7 +79,63 @@ namespace FoodMood.Web.Services
             return g;
         }
 
-        
+        public static int Insert(GenreAddRequest model)
+        {
+            int id = 0;
+            string connectionString = System.Web.Configuration.WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "dbo.Genres_Insert";
+
+                SqlParameterCollection pc = cmd.Parameters;
+                pc.AddWithValue("@Name", model.Name);
+                SqlParameter p = new SqlParameter("@Id", System.Data.SqlDbType.Int);
+                p.Direction = System.Data.ParameterDirection.Output;
+                pc.Add(p);
+
+                cmd.ExecuteNonQuery();
+                Int32.TryParse(pc["@Id"].Value.ToString(), out id);
+            }
+            return id;
+        }
+
+
+        public static void Update(GenreUpdateRequest model)
+        {
+            string connectionString = System.Web.Configuration.WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "dbo.Genres_Update";
+
+                SqlParameterCollection pc = cmd.Parameters;
+                pc.AddWithValue("@Id", model.Id);
+                pc.AddWithValue("@Name", model.Name);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public static void Delete(int id)
+        {
+            string connectionString = System.Web.Configuration.WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "dbo.Genres_Delete";
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
 
         #region before abstraction 
 

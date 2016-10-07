@@ -1,5 +1,4 @@
-﻿using FoodMood.Web.ApiControllers.Controllers;
-using FoodMood.Web.Models.Domains;
+﻿using FoodMood.Web.Models.Domains;
 using FoodMood.Web.Models.Requests;
 using FoodMood.Web.Models.Responses;
 using FoodMood.Web.Services;
@@ -12,50 +11,32 @@ using System.Web.Http;
 
 namespace FoodMood.Web.Controllers.ApiControllers
 {
-    [RoutePrefix("api/genres")]
-    public class GenresApiController : BaseApiController
+    [RoutePrefix("api/options")]
+    public class OptionsApiController : ApiController
     {
-        [Route, HttpGet]
+        [Route()][HttpGet]
         public HttpResponseMessage GetAll()
         {
             try
             {
-                ItemsResponse<Genre> response = new ItemsResponse<Genre>();
-                response.Items = GenresService.SelectAll();
+                ItemsResponse<Option> response = new ItemsResponse<Option>();
+                response.Items = OptionsService.SelectAll();
                 return Request.CreateResponse(HttpStatusCode.OK, response);
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message);
+                ErrorResponse response = new ErrorResponse(ex.Message);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, response);
             }
+            
         }
-
-        [Route("{id:int}"), HttpGet]
+        [Route("{id:int}")][HttpGet]
         public HttpResponseMessage GetById(int id)
         {
             try
             {
-                ItemResponse<Genre> response = new ItemResponse<Genre>();
-                response.Item = GenresService.SelectById(id);
-                return Request.CreateResponse(HttpStatusCode.OK, response);
-            }
-            catch (Exception ex)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
-
-        [Route, HttpPost]
-        public HttpResponseMessage Post(GenreAddRequest model)
-        {
-            if(!ModelState.IsValid && model != null)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
-            }
-            try
-            {
-                ItemResponse<int> response = new ItemResponse<int>();
-                response.Item = GenresService.Insert(model);
+                ItemResponse<Option> response = new ItemResponse<Option>();
+                response.Item = OptionsService.SelectById(id);
                 return Request.CreateResponse(HttpStatusCode.OK, response);
             }
             catch (Exception ex)
@@ -64,8 +45,8 @@ namespace FoodMood.Web.Controllers.ApiControllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, response);
             }
         }
-        [Route("{id:int}"), HttpPut]
-        public HttpResponseMessage Put(GenreUpdateRequest model)
+        [Route, HttpPost]
+        public HttpResponseMessage Post(OptionAddRequest model)
         {
             if (!ModelState.IsValid && model != null)
             {
@@ -73,7 +54,28 @@ namespace FoodMood.Web.Controllers.ApiControllers
             }
             try
             {
-                GenresService.Update(model);
+                int id = OptionsService.Insert(model);
+                ItemResponse<int> response = new ItemResponse<int>();
+                response.Item = id;
+                return Request.CreateResponse(HttpStatusCode.OK, response);
+            }
+            catch (Exception ex)
+            {
+                ErrorResponse response = new ErrorResponse(ex.Message);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        [Route("{id:int}"), HttpPut]
+        public HttpResponseMessage Put(OptionUpdateRequest model)
+        {
+            if (!ModelState.IsValid && model != null)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+            try
+            {
+                OptionsService.Update(model);
                 SuccessResponse sr = new SuccessResponse();
                 return Request.CreateResponse(HttpStatusCode.OK, sr);
             }
@@ -90,7 +92,7 @@ namespace FoodMood.Web.Controllers.ApiControllers
         {
             try
             {
-                GenresService.Delete(id);
+                OptionsService.Delete(id);
                 SuccessResponse sr = new SuccessResponse();
                 return Request.CreateResponse(HttpStatusCode.OK, sr);
             }

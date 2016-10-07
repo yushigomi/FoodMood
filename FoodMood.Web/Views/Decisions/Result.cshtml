@@ -26,15 +26,40 @@
         <br />
         <h2 ng-click="genreVm.onClick()">You're in the mood for...</h2>
         <div>
-            <h2>{{genreVm.item.Name || ""}}</h2>
+            <h2 id="chosenGenre">{{genreVm.item.Name || ""}}</h2>
         </div>
         <hr class="sep">
         <h2>Choose Restaurant Around Me</h2>
         <div>
             <button class="btn btn-block" onclick="randomByLocation()">Choose</button>
+
+            <button class="btn btn-block" onclick="randomByGenre('Italian')">Choose from mood</button>
+
         </div>
     </div>
 </section>
+
+<div ng-controller="optionsController as optionsVm">
+    <div class="row">
+        <form name="optionsVm.addForm" novalidate>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Restaurant Name</label>
+
+                <div class="col-sm-5">
+                    <input type="text" required ng-model="optionsVm.item.name" class="form-control"
+                           placeholder="Enter your choice" name="name" id="name">
+                </div>
+            </div>
+            <button class="btn btn-default" ng-click="optionsVm.insert()" type="button">Add New Option</button>
+        </form>
+    </div>
+
+    <div class="row">
+        <ul>
+            <li ng-repeat="option in optionsVm.options">{{option.Name}}</li>
+        </ul>
+    </div>
+</div>
 
 <div id="map"></div>
 <!-- Replace the value of the key parameter with your own API key. -->
@@ -46,6 +71,7 @@
         (function () {
             angular.module("myApp", []);
         })();
+
         (function () {
             angular.module("myApp").controller("genresController", GenresController);
 
@@ -55,13 +81,14 @@
                 vm = this;
                 vm.$scope = $scope;
                 vm.onClick = _onClick;
+                vm.genres = null;
 
                 vm.pageTitle = "heehee";
                 vm.item = null;
-
                 _render();
 
                 function _render() {
+                    console.log("genre controller success");
                     getAll();
                 }
 
@@ -70,27 +97,78 @@
                         method: 'GET',
                         url: '/api/genres',
                         responseType: 'json',
+                        cache: false
                     }
                     $http(settings).then(_onGetAllSuccess, _onGetAllError);
                 }
-
-
-
-
                 function _onClick() {
+                    console.log("random genre clicked");
                     vm.item = vm.genres[Math.floor(Math.random() * vm.genres.length)];
                 }
                 function _onGetAllSuccess(data, status, jqXHR) {
                     vm.genres = data.data.Items;
                 }
                 function _onGetAllError(data, status, jqXHR) {
-                    console.log(jqXHR.responsetext)
+                    console.log(jqXHR.responsetext);
                 }
-
             }
-
         })();
 
+        (function () {
+            angular.module("myApp").controller("optionsController", OptionsController);
+            OptionsController.$inject = ["$scope", "$http"];
+            function OptionsController($scope, $http) {
+                vm = this;
+                vm.$scope = $scope;
+                vm.item = null;
+                vm.insert = _insert;
+                vm.options = null;
+
+                _render();
+
+                function _render() {
+                    console.log("option controller success");
+                    getAll();
+                }
+
+                function getAll() {
+                    var settings = {
+                        method: 'GET',
+                        url: '/api/options',
+                        responseType: 'json',
+                        cache: false
+                    }
+                    $http(settings).then(_onGetAllSuccess, _onGetAllError);
+                }
+                function _onGetAllSuccess(data, status, jqXHR) {
+                    vm.options = data.data.Items;
+                }
+                function _onGetAllError(data, status, jqXHR) {
+                    console.log(data.data);
+                }
+
+                function _insert() {
+                    var addRequest = JSON.stringify(vm.item);
+                    var settings = {
+                        cache: false,
+                        method: 'POST',
+                        url: '/api/options',
+                        data: addRequest,
+                        responseType: 'json'
+                    }
+                    $http(settings).then(_onInsertSuccess, _onInsertError);
+                }
+                function _onInsertSuccess(data) {
+                    console.log(data.data.Item);
+                    $scope.$apply(function () {
+                        vm.options.push(data.data.Item);
+                    });
+                }
+                function _onInsertError(data) {
+                    console.log(data.data);
+                }
+            }
+        })();
 
 
 
@@ -108,10 +186,41 @@
 
             infowindow = new google.maps.InfoWindow();
 
-           
+
 
 
         }
+
+
+        function randomByGenre(chosenGenre) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    infowindow.setPosition(pos);
+                    infowindow.setContent('Location found.');
+                    map.setCenter(pos);
+                    var request = {
+                        location: pos,
+                        radius: '2000',
+                        type: ['restaurant'],
+                        query: chosenGenre
+                    };
+                    var service = new google.maps.places.PlacesService(map);
+                    service.textSearch(request, callback);
+
+                }, function () {
+                    handleLocationError(true, infowindow, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infowindow, map.getCenter());
+            }
+        }
+
 
         function randomByLocation() {
             if (navigator.geolocation) {
